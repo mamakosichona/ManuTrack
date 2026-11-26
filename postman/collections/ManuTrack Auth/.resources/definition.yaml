@@ -1,0 +1,21 @@
+$kind: collection
+name: ManuTrack Auth
+description: |-
+  Authentication flow for ManuTrack.
+  Step 1 — Run "Login" with the existing Administrator credentials.
+  Step 2 — Run "Create User" to register any new user (Inventory Staff, Production Staff, or Administrator).
+  The Login request automatically saves the Bearer token to {{token}}.
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+variables:
+  - key: baseUrl
+    value: 'http://localhost:3000/api/v1'
+  - key: token
+    value: ''
+  - key: adminEmail
+    value: 'curlluis@gmail.com'
+  - key: adminPassword
+    value: ''

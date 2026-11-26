@@ -1,0 +1,24 @@
+$kind: http-request
+order: 1000
+auth:
+  type: noauth
+url: '{{baseUrl}}/auth/login'
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "email": "{{adminEmail}}",
+      "password": "{{adminPassword}}"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const body = pm.response.json();
+      if (pm.response.code === 200 && body.success && body.data) {
+        pm.collectionVariables.set('token', body.data.accessToken);
+        console.log('Token saved to {{token}}');
+      } else {
+        console.error('Login failed:', body.message ?? body);
+      }

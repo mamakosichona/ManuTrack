@@ -1,0 +1,13 @@
+$kind: http-request
+order: 2000
+url: '{{baseUrl}}/users'
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "email": "curlluis@gmail.com",
+      "password": "{{Curlluisflores}}",
+      "fullName": "Luis Flores",
+      "role": "Inventory Staff"
+    }

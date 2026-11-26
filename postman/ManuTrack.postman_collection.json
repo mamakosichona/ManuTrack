@@ -1,0 +1,227 @@
+{
+  "info": {
+    "name": "ManuTrack Wooden Furniture API v1",
+    "description": "Exercise authentication and the wooden furniture workshop material, stock, production, and finished-furniture endpoints. Bootstrap the initial Administrator only when none exists, then run Login to save the bearer token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "email", "value": "admin@example.com" },
+    { "key": "password", "value": "ChangeThisPassword123!" },
+    { "key": "fullName", "value": "Woodshop Administrator" },
+    { "key": "token", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "materialId", "value": "" },
+    { "key": "inventoryId", "value": "" },
+    { "key": "productionId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register initial Administrator",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"fullName\": \"{{fullName}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data) {",
+                  "  pm.collectionVariables.set('token', body.data.accessToken);",
+                  "  pm.collectionVariables.set('userId', body.data.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Current user",
+          "request": { "method": "GET", "url": "{{baseUrl}}/auth/me" }
+        }
+      ]
+    },
+    {
+      "name": "Users (Administrator)",
+      "item": [
+        {
+          "name": "List users",
+          "request": { "method": "GET", "url": "{{baseUrl}}/users" }
+        },
+        {
+          "name": "Get current user",
+          "request": { "method": "GET", "url": "{{baseUrl}}/users/{{userId}}" }
+        },
+        {
+          "name": "Create Inventory Staff account",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"inventory.staff@example.com\",\n  \"fullName\": \"Woodshop Inventory Staff\",\n  \"password\": \"InventoryPassword123!\",\n  \"role\": \"Inventory Staff\"\n}"
+            },
+            "url": "{{baseUrl}}/users"
+          }
+        },
+        {
+          "name": "Update current user's name",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"{{fullName}}\"\n}" },
+            "url": "{{baseUrl}}/users/{{userId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Workshop materials",
+      "item": [
+        {
+          "name": "Create workshop material",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data) {",
+                  "  pm.collectionVariables.set('materialId', body.data.id);",
+                  "  pm.collectionVariables.set('inventoryId', body.data.inventory.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"materialName\": \"Kiln-dried oak boards\",\n  \"unit\": \"board feet\",\n  \"description\": \"Lumber for dining table tops\"\n}"
+            },
+            "url": "{{baseUrl}}/raw-materials"
+          }
+        },
+        {
+          "name": "List workshop materials",
+          "request": { "method": "GET", "url": "{{baseUrl}}/raw-materials" }
+        },
+        {
+          "name": "Update workshop material",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"description\": \"Kiln-dried boards for dining tables\"\n}" },
+            "url": "{{baseUrl}}/raw-materials/{{materialId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventory (Inventory Staff or Administrator)",
+      "item": [
+        {
+          "name": "List inventory",
+          "request": { "method": "GET", "url": "{{baseUrl}}/inventories" }
+        },
+        {
+          "name": "Update inventory quantity",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"quantityAvailable\": 120.5\n}" },
+            "url": "{{baseUrl}}/inventories/{{inventoryId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Production (Production Staff or Administrator)",
+      "item": [
+        {
+          "name": "Create production record",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.success && body.data) {",
+                  "  pm.collectionVariables.set('productionId', body.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{userId}},\n  \"productionDate\": \"2026-10-24\",\n  \"furnitureName\": \"Oak dining table\",\n  \"quantityProduced\": 20,\n  \"productionStatus\": \"Completed\"\n}"
+            },
+            "url": "{{baseUrl}}/productions"
+          }
+        },
+        {
+          "name": "List production records",
+          "request": { "method": "GET", "url": "{{baseUrl}}/productions" }
+        }
+      ]
+    },
+    {
+      "name": "Finished furniture",
+      "item": [
+        {
+          "name": "Create finished furniture",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productionId\": {{productionId}},\n  \"productName\": \"Oak dining table\",\n  \"quantityAvailable\": 20,\n  \"dateCompleted\": \"2026-10-24\"\n}"
+            },
+            "url": "{{baseUrl}}/finished-products"
+          }
+        },
+        {
+          "name": "List finished furniture",
+          "request": { "method": "GET", "url": "{{baseUrl}}/finished-products" }
+        }
+      ]
+    }
+  ]
+}
